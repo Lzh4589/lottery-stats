@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>特码历史统计（手机版）</title>
+<style>
+:root{
+  --bg:#0f1117; --card:#1a1d26; --card2:#222634; --line:#2e3342;
+  --tx:#e8eaf0; --tx2:#9aa1b2; --tx3:#6b7385;
+  --red:#e5484d; --blue:#3e7bfa; --green:#2fbf71; --gold:#f5a623;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.5;padding-bottom:40px}
+.wrap{max-width:560px;margin:0 auto;padding:0 12px}
+h1{font-size:18px;text-align:center;padding:16px 0 4px}
+.sub{text-align:center;color:var(--tx2);font-size:12px;margin-bottom:4px}
+.ver{text-align:center;color:var(--gold);font-size:11px;margin-bottom:12px;opacity:.85}
+.card{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px;overflow:hidden}
+.card h2{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2::before{content:"";width:4px;height:15px;border-radius:2px;background:var(--gold);flex-shrink:0}
+.badge{font-size:11px;color:var(--tx3);font-weight:400}
+.latest{display:flex;align-items:center;justify-content:space-around;padding:12px 0;flex-wrap:wrap;gap:8px}
+.latest .big{font-size:46px;font-weight:800;line-height:1.1}
+.latest .lbl{font-size:11px;color:var(--tx3);margin-bottom:2px;text-align:center}
+.latest .info{font-size:13px;color:var(--tx2);min-width:140px}
+.latest .info b{color:var(--tx)}
+.chip{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;color:#fff}
+.chip.r{background:var(--red)} .chip.b{background:var(--blue)} .chip.g{background:var(--green)}
+/* 彩球 */
+.blist{display:flex;flex-wrap:wrap;gap:8px}
+.ball{text-align:center}
+.ball .n{width:36px;height:36px;line-height:36px;margin:0 auto;border-radius:50%;font-weight:700;font-size:15px;color:#fff}
+.ball .q{font-size:10px;color:var(--tx3);margin-top:2px}
+.hlist{display:flex;flex-direction:column}
+.hrow{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.hrow:last-child{border-bottom:0}
+.hrow .hb{width:34px;height:34px;line-height:34px;border-radius:50%;text-align:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.hrow .hi{flex:1;min-width:0}
+.hrow .hl{font-size:13px;color:var(--tx);line-height:1.4}
+.hrow .hl span{font-size:11px;color:var(--tx2)}
+.hrow .hd{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.6;word-break:break-all}
+.hrow .hd i{color:var(--gold);font-style:normal}
+.htag{display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:1px}
+.htag.hot{background:rgba(255,90,60,.18);color:#ff7a55}
+.htag.cold{background:rgba(74,158,255,.18);color:#5aa9ff}
+.htag.warm{background:rgba(255,255,255,.08);color:var(--tx2)}
+.hlegend{font-size:11px;color:var(--tx2);line-height:1.9;padding:2px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+/* 遗漏行（两行式，不截断） */
+.mrow{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.mrow:last-child{border-bottom:0}
+.mrow .rk{width:18px;color:var(--tx3);font-size:11px;flex-shrink:0;padding-top:5px}
+.mrow .no{width:30px;flex-shrink:0}
+.mrow .no .b{display:inline-block;width:28px;height:28px;line-height:28px;border-radius:50%;text-align:center;font-weight:700;color:#fff;font-size:13px}
+.mrow .main{flex:1;min-width:0}
+.mrow .l1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mrow .l1 .attrs{min-width:0;font-weight:600}
+.mrow .miss{flex-shrink:0;color:var(--gold);font-weight:800;white-space:nowrap;font-size:15px}
+.mrow .miss .u{font-size:10px;font-weight:400;color:var(--tx3)}
+.mrow .l2{color:var(--tx2);font-size:11px;margin-top:3px;line-height:1.45}
+.mrow .l2 b{color:var(--tx)}
+/* 表格 */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:12px;min-width:480px}
+th{color:var(--tx3);font-weight:500;text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--card)}
+td{padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--tx)}
+td.dim{color:var(--tx2)}
+td b{color:var(--gold)}
+.tag{display:inline-block;padding:0 6px;border-radius:8px;font-size:11px;color:#fff}
+.tag.hot{background:var(--red)} .tag.warm{background:#e0803c} .tag.cool{background:#4a7bd0} .tag.cold{background:#5a6272} .tag.norm{background:#3c4254}
+.wv{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+/* 多维度 */
+.dim-t{font-size:13px;color:var(--tx2);margin:10px 0 4px;font-weight:600}
+.topmiss{background:var(--card2);border-left:3px solid var(--gold);border-radius:6px;padding:7px 9px;margin:2px 0 8px;font-size:12px;color:var(--tx2);line-height:1.55}
+.topmiss b{color:var(--gold);font-size:13px}
+.topmiss .tm-k{display:inline-block;background:var(--gold);color:#111;font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px;margin-right:5px;vertical-align:1px}
+.topmiss .tm-m{margin-top:3px;color:var(--tx);word-break:break-all;font-size:12px}
+.dim-t:first-child{margin-top:0}
+.ditem{padding:5px 0}
+.dq{display:flex;align-items:center;gap:8px;margin:9px 0 0}
+.dq-l{font-size:11px;color:var(--tx3);flex:none}
+.dq select{flex:1;appearance:none;-webkit-appearance:none;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit}
+.dq-out{margin-top:5px}
+.dqblk{padding:7px 0;border-bottom:1px solid var(--line)}
+.dqblk:last-child{border-bottom:0}
+.dqblk-t{font-size:12px;color:var(--tx2);margin-bottom:6px}
+.dqblk .blist-inline{justify-content:flex-start}
+.dqmore{width:100%;margin:8px 0 2px;background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--tx2);font-size:12px;padding:9px;font-family:inherit}
+.q3desc{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 4px}
+.dl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;margin-bottom:3px}
+.dl .k{font-weight:600;flex-shrink:0}
+.dl .p{color:var(--tx2);font-size:11px;text-align:right;min-width:0}
+.dl .p b{color:var(--tx)}
+.track{height:12px;background:var(--card2);border-radius:4px;position:relative;overflow:hidden}
+.track .act{height:100%;background:var(--gold);border-radius:4px}
+.track .theory{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.55}
+.note{font-size:11px;color:var(--tx3);padding:8px 12px 0;text-align:justify}
+.seg{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:transparent;color:var(--tx2);font-size:13px;padding:7px 0;border-radius:8px}
+.seg button.on{background:var(--gold);color:#111;font-weight:700}
+/* 明细查询 */
+.qsel{margin-bottom:10px}
+.qsel select{width:100%;appearance:none;-webkit-appearance:none;background:var(--card2);color:var(--tx);border:0;border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit}
+.sxgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
+.sxgrid button{border:0;background:var(--card2);color:var(--tx2);font-size:13px;padding:8px 0;border-radius:8px;font-family:inherit}
+.sxgrid button.on{background:var(--gold);color:#111;font-weight:700}
+.wgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.wgrid button{border:0;background:var(--card2);color:var(--tx2);font-size:12px;padding:8px 0;border-radius:8px;font-family:inherit}
+.wgrid button.on{background:var(--gold);color:#111;font-weight:700}
+.seg.wrapseg{flex-wrap:wrap}
+.seg.wrapseg button{flex:none;padding:7px 13px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--tx2);font-size:12px;flex-shrink:0}
+.kv .v{text-align:right;color:var(--tx);line-height:1.5}
+.kv .v b{color:var(--gold)}
+.kv .v .dim{color:var(--tx3);font-size:11px}
+.blist-inline{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}
+.blist-inline span{background:var(--card2);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--tx2)}
+.blist-inline span b{color:inherit;font-weight:400}
+.kv .v .blist-inline span b{color:var(--tx2);font-weight:400}
+.blist-inline span i{font-style:normal}
+.g-red{color:#ff4d4f}
+.g-grn{color:#34d399}
+.g-blu{color:#5aa9ff}
+.gaplg{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-bottom:5px;line-height:1.4}
+.gaplgsum{font-size:11px;color:var(--tx2);margin:0 0 9px;line-height:1.5}
+.gaplgbase{font-size:10px;color:var(--tx3);border:1px solid var(--line);border-radius:4px;padding:0 4px;line-height:1.5}
+/* 子页切换 */
+#pageRef .grp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+#pageRef .glabel{width:60px;flex-shrink:0;color:var(--tx2);font-size:12px;padding-top:3px}
+#pageRef .gitems{flex:1;display:flex;flex-wrap:wrap;gap:6px}
+.gchip{display:inline-block;padding:3px 10px;border-radius:16px;font-size:12px;color:#fff}
+.gchip.plain{background:var(--card2);color:var(--tx)}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:#141721;border-top:1px solid var(--line);display:flex;z-index:99;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;border:0;background:transparent;color:var(--tx2);font-size:13px;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.tabs button.on{color:var(--gold);font-weight:700}
+nav.tabs button .ico{font-size:18px;line-height:1}
+body{padding-bottom:72px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>特码历史统计</h1>
+<div class="sub" id="subTitle"></div>
+<div class="ver">数据版本：最新一笔为第 <b id="verQi">-</b> 期 · 更新于 <span id="verTime">-</span></div>
+
+<div class="card">
+  <div class="latest">
+    <div><div class="lbl">最新一期</div><div class="big" id="lastQi"></div><div class="lbl">期</div></div>
+    <div><div class="ball"><div class="n" id="lastBall"></div></div></div>
+    <div class="info" id="lastInfo"></div>
+  </div>
+</div>
+
+<div id="pageMiss">
+<div class="card">
+  <h2>遗漏榜 · 号码 <span class="badge">按当前遗漏排序（前 20）</span></h2>
+  <div id="missNum"></div>
+</div>
+
+<div class="card">
+  <h2>遗漏榜 · 生肖 <span class="badge">按当前遗漏排序（全部 12 肖）</span></h2>
+  <div id="missSx"></div>
+</div>
+
+<div class="card">
+  <h2>最近 20 期 <span class="badge">含此前出现期号与间隔</span></h2>
+  <div class="hlist" id="histList"></div>
+</div>
+
+</div>
+
+<div id="pageQuery" style="display:none">
+<div class="card">
+  <h2>冷热号一览 <span class="badge" id="hcBadge">全部期</span></h2>
+  <div class="wgrid" id="hcWinGrid"></div>
+  <div class="dim" id="hcSxDesc" style="margin:8px 0 6px;line-height:1.7"></div>
+  <div class="seg" id="hcSeg">
+    <button class="on" onclick="setHcMode('hot')">热号 Top20</button>
+    <button onclick="setHcMode('cold')">冷号 Top20</button>
+  </div>
+  <div class="tw"><table id="hcTable"></table></div>
+  <div class="note">窗口按钮下方的文字为所选窗口内各生肖开出的期数（马含 5 个号码，理论上更常出现）。号码榜：热号＝窗口内开出次数最多，冷号＝最少（次数相同则遗漏更久的排前）。历史页签记录上的热/冷/温标签按全部期次数排名固定判定（前 20 热、后 20 冷、其余 9 个温）。以上均为历史统计，不改变下期每个号码 1/49 的概率。</div>
+</div>
+
+<div class="card">
+  <h2>组合筛选查询 <span class="badge">可叠 3 个条件</span></h2>
+  <div class="qsel"><select id="q3a" onchange="renderQ3()"></select></div>
+  <div class="qsel" style="margin-top:8px"><select id="q3b" onchange="renderQ3()"></select></div>
+  <div class="qsel" style="margin-top:8px"><select id="q3c" onchange="renderQ3()"></select></div>
+  <div id="q3Out" style="margin-top:6px"></div>
+  <div class="note">三个条件为「同时满足」：例如「生肖·马」+「波色·红」＝马肖里所有红波号码；再加「五行·水」＝其中五行属水的号码。条件可任意搭配，也可只选一个。间隔着色基准按集合覆盖的号码数折算（49 ÷ 号码个数），即该集合平均多少期出现一次。</div>
+</div>
+
+<div class="card">
+  <h2>号码明细查询 <span class="badge" id="numWinBadge">全部期</span></h2>
+  <div class="wgrid" id="numWinGrid"></div>
+  <div class="qsel"><select id="numSel" onchange="renderNumDetail()"></select></div>
+  <div id="numDetail"></div>
+</div>
+
+<div class="card">
+  <h2>生肖明细查询 <span class="badge" id="sxWinBadge">全部期</span></h2>
+  <div class="wgrid" id="sxWinGrid"></div>
+  <div class="sxgrid" id="sxSel"></div>
+  <div id="sxDetail"></div>
+  <div class="note">马含 5 个号码（理论 10.2%），其余各 4 个号码（8.2%），比较次数需对照理论占比。窗口选择后，次数、占比、间隔均在所选窗口内统计。</div>
+</div>
+
+</div>
+
+<div id="pageDims" style="display:none">
+<div class="card">
+  <h2>多维度遗漏 · 号码类 <span class="badge">按遗漏从高到低</span></h2>
+  <div id="dimsNum"></div>
+  <div class="note">每行为一个类别：金色条＝实际出现占比，白线＝理论占比（按号码支数折算）；明细为「遗漏期数 · 上次出现期号 · 累计出现次数（实际占比，理＝理论占比）」。</div>
+</div>
+
+<div class="card">
+  <h2>多维度遗漏 · 生肖类 <span class="badge">按遗漏从高到低</span></h2>
+  <div id="dimsSx"></div>
+</div>
+</div>
+
+<div id="pageHist" style="display:none">
+<div class="card">
+  <h2>遗漏区间出现次数 <span class="badge" id="waitBadge">遗漏 ≤10 期</span></h2>
+  <div class="wgrid" id="waitGrid"></div>
+  <div id="waitSum" style="margin:6px 0 8px;font-size:12px;line-height:1.6;color:var(--tx2)"></div>
+  <div class="tw" style="max-height:340px;overflow-y:auto"><table id="waitTable" style="min-width:300px"></table></div>
+  <div class="note">口径：统计 49 个号码历史上每次「相邻两次开出的期数差」落在所选区间的次数。选 10 期＝遗漏 10 期之内就再开出（间隔 1–10）；选 20 期＝遗漏超过 10 期、20 期之内再开出（间隔 11–20），以此类推。只统计已完成的间隔，当前仍在遗漏中的号码不计入。</div>
+</div>
+
+<div class="card">
+  <h2>历史开奖记录 <span class="badge" id="histBadge">全部期</span></h2>
+  <div class="hlegend">
+    <div><span class="htag hot">热号</span>全部期开出次数排名前 <b>20</b> 的号码</div>
+    <div><span class="htag cold">冷号</span>全部期开出次数排名后 <b>20</b> 的号码</div>
+    <div><span class="htag warm">温号</span>中间其余 <b>9</b> 个号码</div>
+    <div class="dim" style="margin-top:3px">标记按全部期次数排名固定判定，不随上方显示范围变化；仅记录历史，不改变下期每个号码 1/49 的概率。</div>
+  </div>
+  <div class="wgrid" id="histWinGrid"></div>
+  <div class="qsel"><select id="histNumSel" onchange="renderHist()"></select></div>
+  <div class="hlist" id="histRows"></div>
+  <div class="note">按期号倒序显示每期开出的特别号码，格式与首页「最近 20 期」一致（含此前最近 4 次出现期号与间隔）。上方可切换显示范围，或选择一个号码查看它历次开出的记录。</div>
+</div>
+
+</div>
+
+<div class="note" style="padding:14px 12px 0">
+说明：本页仅为历史开奖号码的记录与描述性统计。每期开奖为独立随机事件，次数、遗漏、冷热均不改变下一期每个号码 1/49 的概率，不构成任何选号、预测或投注依据。仅供记录查看。
+</div>
+
+<div id="pageRef" style="display:none">
+<div class="card">
+  <h2>号码对照总表 <span class="badge">49 号 · 左右滑动查看</span></h2>
+  <div class="tw"><table id="refNumTable"></table></div>
+</div>
+
+<div class="card">
+  <h2>2026 年生肖对照 <span class="badge">号位 01–12 · 2 月 17 日起启用</span></h2>
+  <div class="tw"><table id="refYearTable"></table></div>
+</div>
+
+<div class="card">
+  <h2>生肖五行 <span class="badge">金 2 肖 / 木 2 / 水 2 / 火 2 / 土 4</span></h2>
+  <div id="refGroups0"></div>
+  <div class="note">生肖五行即地支五行——鼠＝子水、牛＝丑土、虎＝寅木、兔＝卯木、龙＝辰土、蛇＝巳火、马＝午火、羊＝未土、猴＝申金、鸡＝酉金、狗＝戌土、猪＝亥水；与「号码五行」（按号码支数分布）是两个概念。</div>
+</div>
+
+<div class="card">
+  <h2>生肖分组 · 天地 / 阴阳 / 男女 / 吉凶</h2>
+  <div id="refGroups1"></div>
+</div>
+
+<div class="card">
+  <h2>生肖分组 · 笔划 / 肖色 / 四季</h2>
+  <div id="refGroups2"></div>
+</div>
+
+<div class="card">
+  <h2>波色单双号码表 <span class="badge">红 17 / 蓝 16 / 绿 16</span></h2>
+  <div id="refWave"></div>
+</div>
+
+<div class="card">
+  <h2>五行号码分布 <span class="badge">金 10 / 木 10 / 水 9 / 火 12 / 土 8</span></h2>
+  <div id="refWx"></div>
+</div>
+
+<div class="note" style="padding:0 12px">
+说明：对照表整理自《2026 年六合大全经典全年资料》，生肖灵码 / 五行 / 波色与号码对照一致，仅供参考。开奖为独立随机事件，本页不构成任何预测或投注依据。
+</div>
+</div>
+
+</div>
+
+<nav class="tabs">
+  <button id="tabMiss" class="on" onclick="switchTab('miss')"><span class="ico">🎯</span>遗漏</button>
+  <button id="tabQuery" onclick="switchTab('query')"><span class="ico">🔍</span>查询</button>
+  <button id="tabDims" onclick="switchTab('dims')"><span class="ico">🧩</span>多维遗漏</button>
+  <button id="tabHist" onclick="switchTab('hist')"><span class="ico">🗂️</span>历史</button>
+  <button id="tabRef" onclick="switchTab('ref')"><span class="ico">📖</span>对照表</button>
+</nav>
+
+<script>
+const DRAWS=[[1,29],[2,22],[3,9],[4,45],[5,43],[6,13],[7,41],[8,21],[9,28],[10,27],[11,11],[12,11],[13,1],[14,26],[15,31],[16,6],[17,32],[18,39],[19,46],[20,12],[21,42],[22,18],[23,47],[24,28],[25,37],[26,19],[27,45],[28,3],[29,1],[30,41],[31,26],[32,6],[33,41],[34,19],[35,27],[36,1],[37,43],[38,42],[39,11],[40,28],[41,36],[42,16],[43,13],[44,19],[45,1],[46,3],[47,39],[48,24],[49,13],[50,23],[51,1],[52,38],[53,15],[54,48],[55,14],[56,48],[57,23],[58,31],[59,10],[60,9],[61,29],[62,24],[63,28],[64,18],[65,5],[66,37],[67,5],[68,23],[69,24],[70,25],[71,48],[72,46],[73,34],[74,10],[75,33],[76,2],[77,29],[78,46],[79,35],[80,3],[81,17],[82,27],[83,5],[84,16],[85,19],[86,12],[87,26],[88,27],[89,49],[90,36],[91,37],[92,6],[93,40],[94,17],[95,35],[96,43],[97,11],[98,17],[99,12],[100,33],[101,39],[102,20],[103,6],[104,1],[105,28],[106,22],[107,49],[108,45],[109,16],[110,30],[111,1],[112,9],[113,2],[114,30],[115,4],[116,22],[117,16],[118,8],[119,11],[120,6],[121,44],[122,1],[123,46],[124,39],[125,31],[126,49],[127,45],[128,37],[129,41],[130,29],[131,7],[132,30],[133,7],[134,37],[135,30],[136,48],[137,26],[138,49],[139,24],[140,16],[141,33],[142,23],[143,44],[144,43],[145,5],[146,42],[147,13],[148,48],[149,27],[150,9],[151,31],[152,45],[153,41],[154,41],[155,7],[156,1],[157,40],[158,16],[159,39],[160,2],[161,8],[162,32],[163,37],[164,21],[165,3],[166,6],[167,19],[168,15],[169,24],[170,3],[171,28],[172,44],[173,26],[174,41],[175,26],[176,10],[177,14],[178,18],[179,15],[180,21],[181,19],[182,41],[183,24],[184,1],[185,36],[186,23],[187,1],[188,16],[189,15],[190,16],[191,29],[192,25],[193,9],[194,26],[195,25],[196,39],[197,8],[198,7],[199,36],[200,39],[201,32],[202,40],[203,25],[204,5],[205,3],[206,47],[207,31],[208,19],[209,8],[210,49],[211,1],[212,6],[213,35],[214,4],[215,14],[216,37],[217,26],[218,17],[219,43],[220,48],[221,1],[222,26],[223,23],[224,9],[225,1],[226,17],[227,16],[228,23],[229,38],[230,16],[231,20],[232,42],[233,7],[234,39],[235,32],[236,11],[237,12],[238,17],[239,5],[240,27],[241,49],[242,9],[243,21],[244,46],[245,18],[246,30],[247,40],[248,20],[249,23],[250,14],[251,30],[252,22],[253,16],[254,2],[255,44],[256,1],[257,7],[258,46],[259,22],[260,20],[261,24],[262,30],[263,9],[264,21],[265,49],[266,8],[267,40],[268,40],[269,22],[270,19],[271,35],[272,2],[273,5],[274,33],[275,17],[276,14],[277,11],[278,2],[279,10],[280,15],[281,10],[282,23],[283,18],[284,32],[285,19],[286,24],[287,8],[288,25],[289,38],[290,40],[291,17],[292,36],[293,5],[294,28],[295,25],[296,23],[297,13],[298,8],[299,23],[300,38],[301,17],[302,45],[303,17],[304,21],[305,26],[306,15],[307,42],[308,46],[309,13],[310,46],[311,34],[312,38],[313,43],[314,31],[315,48],[316,3],[317,26],[318,38],[319,5],[320,20],[321,41],[322,7],[323,47],[324,43],[325,3],[326,23],[327,45],[328,6]];
+
+// 号码 -> 生肖/五行/波色
+const NUM_META={1:["马","水","红"],2:["蛇","火","红"],3:["龙","火","蓝"],4:["兔","金","蓝"],5:["虎","金","绿"],6:["牛","土","绿"],7:["鼠","土","红"],8:["猪","木","红"],9:["狗","木","蓝"],10:["鸡","火","蓝"],11:["猴","火","绿"],12:["羊","金","红"],13:["马","金","红"],14:["蛇","水","蓝"],15:["龙","水","蓝"],16:["兔","木","绿"],17:["虎","木","绿"],18:["牛","火","红"],19:["鼠","火","红"],20:["猪","土","蓝"],21:["狗","土","绿"],22:["鸡","水","绿"],23:["猴","水","红"],24:["羊","木","红"],25:["马","木","蓝"],26:["蛇","金","蓝"],27:["龙","金","绿"],28:["兔","土","绿"],29:["虎","土","红"],30:["牛","水","红"],31:["鼠","水","蓝"],32:["猪","火","绿"],33:["狗","火","绿"],34:["鸡","金","红"],35:["猴","金","红"],36:["羊","土","蓝"],37:["马","土","蓝"],38:["蛇","木","绿"],39:["龙","木","绿"],40:["兔","火","红"],41:["虎","火","蓝"],42:["牛","金","蓝"],43:["鼠","金","绿"],44:["猪","水","绿"],45:["狗","水","红"],46:["鸡","木","红"],47:["猴","木","蓝"],48:["羊","火","蓝"],49:["马","火","绿"]};
+
+// 生肖 -> 天地/阴阳/男女/吉凶/四季/肖色/笔划/地支五行
+const SX_META={
+"鼠":{"td":"地","yy":"阴","nn":"男","jx":"凶","sj":"春(东)","sc":"红","bh":"单笔","dz":"水"},
+"牛":{"td":"天","yy":"阳","nn":"男","jx":"凶","sj":"冬(北)","sc":"绿","bh":"双笔","dz":"土"},
+"虎":{"td":"地","yy":"阳","nn":"男","jx":"凶","sj":"春(东)","sc":"蓝","bh":"双笔","dz":"木"},
+"兔":{"td":"天","yy":"阳","nn":"女","jx":"吉","sj":"春(东)","sc":"红","bh":"双笔","dz":"木"},
+"龙":{"td":"天","yy":"阴","nn":"男","jx":"吉","sj":"春(东)","sc":"绿","bh":"单笔","dz":"土"},
+"蛇":{"td":"地","yy":"阴","nn":"女","jx":"吉","sj":"夏(南)","sc":"蓝","bh":"单笔","dz":"火"},
+"马":{"td":"天","yy":"阴","nn":"男","jx":"吉","sj":"夏(南)","sc":"红","bh":"单笔","dz":"火"},
+"羊":{"td":"地","yy":"阳","nn":"女","jx":"吉","sj":"夏(南)","sc":"绿","bh":"双笔","dz":"土"},
+"猴":{"td":"天","yy":"阳","nn":"男","jx":"凶","sj":"秋(西)","sc":"蓝","bh":"双笔","dz":"金"},
+"鸡":{"td":"地","yy":"阳","nn":"女","jx":"吉","sj":"秋(西)","sc":"红","bh":"单笔","dz":"金"},
+"狗":{"td":"地","yy":"阴","nn":"男","jx":"凶","sj":"秋(西)","sc":"绿","bh":"双笔","dz":"土"},
+"猪":{"td":"天","yy":"阴","nn":"女","jx":"凶","sj":"冬(北)","sc":"蓝","bh":"单笔","dz":"水"}};
+
+const WAVE={红:"var(--red)",蓝:"var(--blue)",绿:"var(--green)"};
+const TOTAL=DRAWS.length, LAST_QI=DRAWS[TOTAL-1][0], LAST_NUM=DRAWS[TOTAL-1][1];
+const fmt2=n=>String(n).padStart(2,"0");
+const fmt3=n=>String(n).padStart(3,"0");
+function meta(n){
+  const[nx,wx,bs]=NUM_META[n];
+  return{nx,wx,bs,jo:n%2?"奇":"偶",dx:n<=24?"小":"大",hs:(Math.floor(n/10)+n%10)%2?"合单":"合双",...SX_META[nx]};
+}
+
+// ===== 基础统计 =====
+const numCnt={},numLast={},numHist={};
+DRAWS.forEach(([q,n])=>{numCnt[n]=(numCnt[n]||0)+1;numLast[n]=q;(numHist[n]=numHist[n]||[]).unshift(q);});
+const numMiss={};for(let n=1;n<=49;n++)numMiss[n]=LAST_QI-(numLast[n]||0);
+const SX=["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
+const sxCnt={},sxLast={},sxHist={};
+DRAWS.forEach(([q,n])=>{const s=NUM_META[n][0];sxCnt[s]=(sxCnt[s]||0)+1;sxLast[s]=q;(sxHist[s]=sxHist[s]||[]).unshift(q);});
+const sxMiss={};SX.forEach(s=>sxMiss[s]=LAST_QI-sxLast[s]);
+function hotTag(c){
+  if(c>=11)return["热号","hot"];if(c>=8)return["较热","warm"];
+  if(c>=5)return["一般","norm"];if(c>=3)return["偏冷","cool"];return["冷号","cold"];
+}
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+// ===== 头部 =====
+document.getElementById("subTitle").textContent="第 001–"+LAST_QI+" 期 · 共 "+TOTAL+" 期 · 仅供记录";
+document.getElementById("verQi").textContent=LAST_QI;
+document.getElementById("verTime").textContent="11-24 21:43";
+
+document.getElementById("lastQi").textContent=fmt3(LAST_QI);
+const lb=document.getElementById("lastBall");
+lb.textContent=fmt2(LAST_NUM);lb.style.background=WAVE[NUM_META[LAST_NUM][2]];
+const lm=meta(LAST_NUM);
+document.getElementById("lastInfo").innerHTML=
+ '<span class="chip '+(NUM_META[LAST_NUM][2]==="红"?"r":NUM_META[LAST_NUM][2]==="蓝"?"b":"g")+'">'+NUM_META[LAST_NUM][0]+"</span> "
+ +lm.wx+"行 · "+lm.jo+" · "+lm.dx+" · "+lm.hs+"<br><span style='font-size:11px'>上一次同号出现在第 "+fmt3(numLast[LAST_NUM]===LAST_QI?(numHist[LAST_NUM][1]||LAST_QI):numLast[LAST_NUM])+" 期</span>";
+
+// ===== 遗漏榜·号码（前20） =====
+const missNumSorted=Object.keys(numMiss).map(Number).sort((a,b)=>numMiss[b]-numMiss[a]);
+const mnEl=document.getElementById("missNum");
+missNumSorted.slice(0,20).forEach((n,i)=>{
+  const m=meta(n),h5=numHist[n].slice(0,5).map(fmt3).join(" / ");
+  mnEl.insertAdjacentHTML("beforeend",
+   '<div class="mrow"><div class="rk">'+(i+1)+'</div><div class="no"><span class="b" style="background:'+WAVE[m.bs]+'">'+fmt2(n)+'</span></div>'
+   +'<div class="main"><div class="l1"><span class="attrs">'+m.nx+" · "+m.bs+"波 · "+m.wx+"行 · "+m.dx+m.jo+'</span><span class="miss">'+numMiss[n]+'<span class="u"> 期未开</span></span></div>'
+   +'<div class="l2">共<b>'+numCnt[n]+"</b>次 · 上次第"+fmt3(numLast[n])+"期 · 近5次："+h5+"</div></div></div>");
+});
+
+// ===== 遗漏榜·生肖（12肖） =====
+const missSxSorted=SX.slice().sort((a,b)=>sxMiss[b]-sxMiss[a]);
+const msEl=document.getElementById("missSx");
+missSxSorted.forEach((s,i)=>{
+  const m=SX_META[s],h5=sxHist[s].slice(0,5).map(fmt3).join(" / ");
+  msEl.insertAdjacentHTML("beforeend",
+   '<div class="mrow"><div class="rk">'+(i+1)+'</div><div class="no"><span class="b" style="background:'+WAVE[m.sc]+'">'+s+'</span></div>'
+   +'<div class="main"><div class="l1"><span class="attrs">'+m.td+"肖 · "+m.yy+" · "+m.nn+"肖 · "+m.jx+'肖</span><span class="miss">'+sxMiss[s]+'<span class="u"> 期未开</span></span></div>'
+   +'<div class="l2">共<b>'+sxCnt[s]+"</b>次 · 上次第"+fmt3(sxLast[s])+"期 · 近5次："+h5+" · 平均间隔"+(TOTAL/sxCnt[s]).toFixed(1)+"期</div></div></div>");
+});
+
+// ===== 多维度遗漏 =====
+const DIMS=[
+ {name:"肖色",key:"sc",cats:["红","绿","蓝"],scope:"sx"},
+ {name:"地支五行",key:"dz",cats:["金","木","水","火","土"],scope:"sx"},
+ {name:"天地肖",key:"td",cats:["天","地"],scope:"sx"},
+ {name:"阴阳肖",key:"yy",cats:["阴","阳"],scope:"sx"},
+ {name:"男女肖",key:"nn",cats:["男","女"],scope:"sx"},
+ {name:"吉凶肖",key:"jx",cats:["吉","凶"],scope:"sx"},
+ {name:"四季肖",key:"sj",cats:["春(东)","夏(南)","秋(西)","冬(北)"],scope:"sx"},
+ {name:"笔划",key:"bh",cats:["单笔","双笔"],scope:"sx"},
+ {name:"波色",key:"bs",cats:["红","蓝","绿"],scope:"num"},
+ {name:"五行",key:"wx",cats:["金","木","水","火","土"],scope:"num"},
+ {name:"大小",key:"dx",cats:["小","大"],scope:"num"},
+ {name:"单双",key:"jo",cats:["奇","偶"],scope:"num"},
+ {name:"合数单双",key:"hs",cats:["合单","合双"],scope:"num"},
+];
+// 每维度各类别：出现次数、上次期号、理论支数
+const dimStat={};
+DIMS.forEach(d=>{
+  dimStat[d.name]={};
+  d.cats.forEach(c=>dimStat[d.name][c]={cnt:0,last:0,cells:0});
+});
+DRAWS.forEach(([q,n])=>{
+  const m=meta(n);
+  DIMS.forEach(d=>{
+    const v=scopeVal(m,d);
+    const st=dimStat[d.name][v];
+    if(st){st.cnt++;if(q>st.last)st.last=q;}
+  });
+});
+function scopeVal(m,d){
+  if(d.scope==="num")return m[d.key];
+  return SX_META[m.nx][d.key];
+}
+// 理论支数
+for(let n=1;n<=49;n++){
+  const m=meta(n);
+  DIMS.forEach(d=>{
+    const v=scopeVal(m,d);
+    const st=dimStat[d.name][v];
+    if(st)st.cells++;
+  });
+}
+DIMS.forEach((d,di)=>{
+  const rows=d.cats.map(c=>({c,...dimStat[d.name][c],miss:LAST_QI-dimStat[d.name][c].last}))
+    .sort((a,b)=>b.miss-a.miss);
+  let html='<div class="dim-t">'+d.name+"</div>";
+  // 遗漏第一：列出该类别包含的号码/生肖
+  const top=rows[0];
+  const mem = d.scope==="num"
+    ? Array.from({length:49},(_,k)=>k+1).filter(n=>meta(n)[d.key]===top.c)
+    : SX.filter(s=>SX_META[s][d.key]===top.c);
+  const memHtml = mem.map(x=>d.scope==="num"
+      ? '<span class="wv" style="background:'+WAVE[NUM_META[x][2]]+'"></span>'+fmt2(x)
+      : x).join(d.scope==="num"?" ":"、");
+  html+='<div class="topmiss"><span class="tm-k">遗漏第一</span><b>'+top.c+"</b> · "+top.miss+" 期未开"
+    +'<div class="tm-m">'+(d.scope==="num"?"包含号码":"包含肖")+"："+memHtml+"</div></div>";
+  rows.forEach(r=>{
+    const pct=r.cnt/TOTAL*100,th=r.cells/49*100;
+    html+='<div class="ditem"><div class="dl"><span class="k">'+r.c+'</span><span class="p">遗漏<b>'+(LAST_QI-r.last)+"</b>期 · 上次"+fmt3(r.last)+" · "+r.cnt+"次 "+pct.toFixed(1)+"%（理"+th.toFixed(1)+"%）</span></div>"
+     +'<div class="track"><div class="act" style="width:'+pct.toFixed(1)+'%"></div><div class="theory" style="left:'+th.toFixed(1)+'%"></div></div></div>';
+  });
+  html+='<div class="dq"><span class="dq-l">查询</span><select id="dqSel'+di+'" onchange="dimQuery('+di+')">'
+    +'<option value="">选择「'+d.name+'」内的属性…</option>'
+    +d.cats.map(c=>'<option value="'+c+'">'+c+"</option>").join("")
+    +'</select></div><div class="dq-out" id="dqOut'+di+'"></div>';
+  document.getElementById(d.scope==="sx"?"dimsSx":"dimsNum").insertAdjacentHTML("beforeend",html);
+});
+// 维度内某属性的历史记录（升序返回期号）
+function dimHistList(d,cat){
+  const out=[];
+  for(let i=DRAWS.length-1;i>=0;i--){
+    const q=DRAWS[i][0],n=DRAWS[i][1];
+    if(scopeVal(meta(n),d)===cat)out.push(q);
+  }
+  return out;
+}
+const DIM_SHOW={};
+function dimMore(di){DIM_SHOW[di]=!DIM_SHOW[di];dimQuery(di);}
+function dimQuery(di){
+  const d=DIMS[di];
+  const sel=document.getElementById("dqSel"+di),el=document.getElementById("dqOut"+di);
+  const cat=sel.value;
+  if(!cat){el.innerHTML="";return;}
+  const h=dimHistList(d,cat);
+  if(!h.length){el.innerHTML='<div class="dq">「'+cat+'」暂无出现记录</div>';return;}
+  const asc=h.slice().sort((a,b)=>a-b);
+  const ivs=[];
+  for(let k=1;k<asc.length;k++)ivs.push(asc[k]-asc[k-1]);
+  ivs.push(LAST_QI-asc[asc.length-1]);
+  const avg=(ivs.reduce((s,x)=>s+x,0)/ivs.length).toFixed(1);
+  const mx=Math.max(...ivs),mn=Math.min(...ivs);
+  const LIM=24,all=!!DIM_SHOW[di],shown=all?h:h.slice(0,LIM);
+  el.innerHTML=
+    kv("累计出现（该属性）","<b>"+h.length+"</b> 次 · 占 "+TOTAL+" 期的 "+(h.length/TOTAL*100).toFixed(1)+"%")
+    +kv("平均间隔","<b>"+avg+"</b> 期（最短 "+mn+" · 最长 "+mx+"）")
+    +kv("最近一次 / 当前遗漏","第 "+fmt3(h[0])+" 期 · 已隔 <b>"+(LAST_QI-h[0])+"</b> 期")
+    +'<div class="dqblk"><div class="dqblk-t">'+(all||h.length<=LIM?"全部出现记录":"最近 "+LIM+" 条")+'（共 '+h.length+' 次）</div>'
+    +gapLegend(d.cats.length,h,LAST_QI)+recentList(shown,LAST_QI,d.cats.length)+'</div>'
+    +(h.length>LIM?'<button class="dqmore" onclick="dimMore('+di+')">'+(all?"收起，只看最近 "+LIM+" 条":"显示全部 "+h.length+" 条记录")+"</button>":"");
+}
+
+// ===== 冷热等级（按全部期开出次数排名：前 20 热号 / 后 20 冷号 / 其余温号） =====
+const HC_ORDER=Array.from({length:49},(_,k)=>k+1).sort((a,b)=>((numCnt[b]||0)-(numCnt[a]||0))||a-b);
+const HC_HOT=new Set(HC_ORDER.slice(0,20)),HC_COLD=new Set(HC_ORDER.slice(-20));
+const hcRank=n=>HC_ORDER.indexOf(n)+1;
+const hcTag=n=>HC_HOT.has(n)?'<span class="htag hot">热号</span>':(HC_COLD.has(n)?'<span class="htag cold">冷号</span>':'<span class="htag warm">温号</span>');
+
+// ===== 明细查询（按需筛选号码/生肖 + 统计窗口） =====
+const kv=(k,v)=>'<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+"</span></div>";
+const DET_WINS=[10,20,30,40,50,100,150,200,0];
+const winLabel=w=>w===0?"全部期":"最近 "+w+" 期";
+let numWin=0,sxWin=0;
+function buildWinGrid(gridId,getter,stateSetter,renderFn){
+  const g=document.getElementById(gridId);
+  DET_WINS.forEach(w=>{
+    const b=document.createElement("button");
+    b.textContent=w===0?"全部":w+"期";
+    b.onclick=()=>{stateSetter(w);g.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));renderFn();};
+    g.appendChild(b);
+  });
+  g.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",DET_WINS[i]===getter()));
+}
+// 间隔着色：以"条目数 n"为基准 —— 间隔 ≤n 绿、n+1~2n 蓝、>2n 红
+const GAP_CLS=["g-grn","g-blu","g-red"];
+const gapTier=(gap,n)=>gap<=n?0:(gap<=2*n?1:2);
+const gapCounts=(h,endQi,n)=>{
+  const c=[0,0,0];
+  for(let i=0;i<h.length;i++){const gap=i===0?endQi-h[0]:h[i-1]-h[i];c[gapTier(gap,n)]++;}
+  return c;
+};
+const recentList=(h,endQi,n)=>{
+  const lim=h.length;
+  let out='<div class="blist-inline">';
+  for(let i=0;i<lim;i++){
+    const gap=i===0?endQi-h[0]:h[i-1]-h[i];
+    const g='<i class="'+GAP_CLS[gapTier(gap,n)]+'">隔'+gap+'</i>';
+    out+="<span><b>"+fmt3(h[i])+"</b>期 · "+g+"</span>";
+  }
+  return out+"</div>";
+};
+const gapLegend=(n,h,endQi)=>{
+  const c=gapCounts(h,endQi,n);
+  return '<div class="gaplg">'
+    +'<span class="gaplgbase">基准 '+n+' 期</span>'
+    +'<span class="g-grn">≤'+n+'</span>'
+    +'<span class="g-blu">'+(n+1)+'–'+(2*n)+'</span>'
+    +'<span class="g-red">≥'+(2*n+1)+'</span></div>'
+    +'<div class="gaplgsum">共 '+h.length+' 次记录，颜色数量：<span class="g-grn">绿 '+c[0]+'</span> · <span class="g-blu">蓝 '+c[1]+'</span> · <span class="g-red">红 '+c[2]+'</span></div>';
+};
+function winHist(fullHist,w){
+  if(w===0)return fullHist.slice();
+  const startQi=LAST_QI-w+1;
+  return fullHist.filter(q=>q>=startQi);
+}
+function renderNumDetail(){
+  const w=numWin;
+  document.getElementById("numWinBadge").textContent=winLabel(w);
+  const n=Number(document.getElementById("numSel").value);
+  const m=meta(n),th=100/49;
+  const hAll=(numHist[n]||[]).slice();
+  const h=winHist(hAll,w);
+  const wTotal=w===0?TOTAL:w;
+  const c=h.length,pct=c/wTotal*100,dev=pct-th;
+  const asc=h.slice().sort((a,b)=>a-b);
+  let ivs=[];for(let k=1;k<asc.length;k++)ivs.push(asc[k]-asc[k-1]);
+  if(asc.length)ivs.push(LAST_QI-asc[asc.length-1]);
+  const avgI=ivs.length?(ivs.reduce((s,x)=>s+x,0)/ivs.length).toFixed(1)+"期":"-";
+  const maxI=ivs.length?Math.max(...ivs)+"期":"-";
+  const wStart=w===0?1:LAST_QI-w+1;
+  document.getElementById("numDetail").innerHTML=
+    kv("基本属性",'<span class="chip '+(m.bs==="红"?"r":m.bs==="蓝"?"b":"g")+'" style="font-size:11px">'+m.nx+"</span> "+m.bs+"波 · "+m.wx+"行 · "+m.dx+m.jo+" · "+m.hs+" · "+m.td+"肖 · "+m.yy+" · "+m.nn+"肖 · "+m.jx+"肖 · "+m.sc+"肖")
+    +kv("窗口内出现","<b>"+c+"</b> 次（第 "+fmt3(wStart)+"–"+fmt3(LAST_QI)+" 期，共 "+wTotal+" 期），占比 "+pct.toFixed(1)+"% <span class='dim'>(理 "+th.toFixed(1)+"%，偏离 "+(dev>=0?"+":"")+dev.toFixed(1)+"pp)</span>")
+    +kv("累计出现（全部期）","<b>"+(numCnt[n]||0)+"</b> 次")
+    +kv("冷热属性",hcTag(n)+" 全部期次数排名第 <b>"+hcRank(n)+"</b> / 49 <span class='dim'>(前 20 为热号，后 20 为冷号，其余温号)</span>")
+    +kv("当前遗漏","<b>"+(LAST_QI-(hAll[0]||0))+"</b> 期"+(h.length===0&&hAll.length?"（窗口内未出现，上次在第 "+fmt3(hAll[0])+" 期）":""))
+    +kv("上次出现","第 "+fmt3(hAll[0]||0)+" 期"+(hAll[1]?"，再上次第 "+fmt3(hAll[1])+" 期（隔 "+(hAll[0]-hAll[1])+" 期）":""))
+    +kv("窗口内间隔","平均 "+avgI+" · 最长 "+maxI)
+    +'<div class="kv"><span class="k">全部出现记录（共 '+hAll.length+' 次）</span><span class="v">'+(hAll.length?gapLegend(49,hAll,LAST_QI)+recentList(hAll,LAST_QI,49):"尚无记录")+"</span></div>";
+}
+const numSelEl=document.getElementById("numSel");
+for(let n=1;n<=49;n++){
+  const o=document.createElement("option");
+  o.value=n;o.textContent=fmt2(n)+" 号 · "+NUM_META[n][0]+" · "+NUM_META[n][2]+"波";
+  numSelEl.appendChild(o);
+}
+numSelEl.value=LAST_NUM;
+buildWinGrid("numWinGrid",()=>numWin,w=>numWin=w,renderNumDetail);
+renderNumDetail();
+
+function renderSxDetail(s){
+  const w=sxWin;
+  document.getElementById("sxWinBadge").textContent=winLabel(w);
+  const m=SX_META[s],th=(s==="马"?5:4)/49*100;
+  const hAll=(sxHist[s]||[]).slice();
+  const h=winHist(hAll,w);
+  const wTotal=w===0?TOTAL:w;
+  const c=h.length,pct=c/wTotal*100,dev=pct-th;
+  const asc=h.slice().sort((a,b)=>a-b);
+  let ivs=[];for(let k=1;k<asc.length;k++)ivs.push(asc[k]-asc[k-1]);
+  if(asc.length)ivs.push(LAST_QI-asc[asc.length-1]);
+  const avgI=ivs.length?(ivs.reduce((s2,x)=>s2+x,0)/ivs.length).toFixed(1)+"期":"-";
+  const maxI=ivs.length?Math.max(...ivs)+"期":"-";
+  const nums=Array.from({length:49},(_,k)=>k+1).filter(x=>NUM_META[x][0]===s);
+  const wStart=w===0?1:LAST_QI-w+1;
+  document.getElementById("sxDetail").innerHTML=
+    kv("基本属性",m.td+"肖 · "+m.yy+" · "+m.nn+"肖 · "+m.jx+"肖 · "+m.sj+" · "+m.sc+"肖色 · "+m.bh+" · 地支"+m.dz+"行")
+    +kv("包含号码",nums.map(x=>'<span class="chip" style="background:'+WAVE[NUM_META[x][2]]+';font-size:11px">'+fmt2(x)+"</span>").join(" "))
+    +kv("窗口内出现","<b>"+c+"</b> 次（第 "+fmt3(wStart)+"–"+fmt3(LAST_QI)+" 期，共 "+wTotal+" 期），占比 "+pct.toFixed(1)+"% <span class='dim'>(理 "+th.toFixed(1)+"%，偏离 "+(dev>=0?"+":"")+dev.toFixed(1)+"pp)</span>")
+    +kv("累计出现（全部期）","<b>"+(sxCnt[s]||0)+"</b> 次")
+    +kv("当前遗漏","<b>"+(LAST_QI-(hAll[0]||0))+"</b> 期"+(h.length===0&&hAll.length?"（窗口内未出现，上次在第 "+fmt3(hAll[0])+" 期）":""))
+    +kv("上次出现","第 "+fmt3(hAll[0]||0)+" 期"+(hAll[1]?"，再上次第 "+fmt3(hAll[1])+" 期（隔 "+(hAll[0]-hAll[1])+" 期）":""))
+    +kv("窗口内间隔","平均 "+avgI+" · 最长 "+maxI)
+    +'<div class="kv"><span class="k">全部出现记录（共 '+hAll.length+' 次）</span><span class="v">'+(hAll.length?gapLegend(12,hAll,LAST_QI)+recentList(hAll,LAST_QI,12):"尚无记录")+"</span></div>";
+}
+const sxSelEl=document.getElementById("sxSel");
+SX.forEach(s=>{
+  const b=document.createElement("button");
+  b.textContent=s;b.dataset.sx=s;
+  b.onclick=()=>{sxSelEl.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));renderSxDetail(s);};
+  sxSelEl.appendChild(b);
+});
+sxSelEl.querySelector("button").classList.add("on");
+buildWinGrid("sxWinGrid",()=>sxWin,w=>sxWin=w,()=>renderSxDetail(sxSelEl.querySelector("button.on").dataset.sx));
+renderSxDetail(SX_META[NUM_META[LAST_NUM][0]]?NUM_META[LAST_NUM][0]:"鼠");
+
+// ===== 冷热号一览 =====
+let hcWin=0,hcMode="hot";
+function setHcMode(mode){
+  hcMode=mode;
+  document.querySelectorAll("#hcSeg button").forEach((b,i)=>b.classList.toggle("on",(i===0)===(mode==="hot")));
+  renderHc();
+}
+function renderHc(){
+  document.getElementById("hcBadge").textContent=winLabel(hcWin);
+  const wTotal=hcWin===0?TOTAL:hcWin;
+  const startQi=hcWin===0?1:LAST_QI-hcWin+1;
+  const rows=[];
+  for(let n=1;n<=49;n++){
+    const h=numHist[n]||[];
+    const inWin=h.filter(q=>q>=startQi);
+    const lastIn=inWin.length?inWin[0]:null;
+    rows.push({n,c:inWin.length,last:lastIn,lastAll:numLast[n]||0,miss:LAST_QI-(numLast[n]||0),m:meta(n)});
+  }
+  rows.sort((a,b)=>hcMode==="hot"
+    ?(b.c-a.c||a.miss-b.miss||a.n-b.n)
+    :(a.c-b.c||b.miss-a.miss||a.n-b.n));
+  let t="<tr><th>#</th><th>号码</th><th>窗口内次数</th><th>占比</th><th>当前遗漏</th><th>上次</th></tr>";
+  rows.slice(0,20).forEach((r,i)=>{
+    t+="<tr><td class='dim'>"+(i+1)+"</td><td><span class='wv' style='background:"+WAVE[r.m.bs]+"'></span><b>"+fmt2(r.n)+"</b> <span class='dim'>"+r.m.nx+"</span></td>"
+      +"<td><b>"+r.c+"</b></td><td class='dim'>"+(r.c/wTotal*100).toFixed(1)+"%</td>"
+      +"<td>"+r.miss+"</td><td class='dim'>"+(r.lastAll?fmt3(r.lastAll)+(r.last?"":"（窗口内未开）"):"—")+"</td></tr>";
+  });
+  document.getElementById("hcTable").innerHTML=t;
+
+  // 生肖出现情况（一句话描述当前所选窗口）
+  const sxRows=SX.map(s=>{
+    const inWin=(sxHist[s]||[]).filter(q=>q>=startQi);
+    return {s,c:inWin.length,lastAll:(sxHist[s]||[])[0]||0};
+  });
+  sxRows.forEach(r=>r.miss=LAST_QI-r.lastAll);
+  sxRows.sort((a,b)=>b.c-a.c||b.miss-a.miss||SX.indexOf(a.s)-SX.indexOf(b.s));
+  const appeared=sxRows.filter(r=>r.c>0),absent=sxRows.filter(r=>r.c===0);
+  let desc="本窗口生肖出现："+(appeared.length?appeared.map(r=>r.s+" "+r.c+"期").join("、"):"无");
+  if(absent.length)desc+="；未出现："+absent.map(r=>r.s).join("、");
+  document.getElementById("hcSxDesc").textContent=desc;
+}
+buildWinGrid("hcWinGrid",()=>hcWin,w=>hcWin=w,renderHc);
+renderHc();
+
+// ===== 历史开奖记录（逐期明细，与首页最近20期同格式） =====
+let histWin=0;
+// 每期开出生肖距其上一次出现的间隔（null=该肖首次出现）
+const sxGapAt={};
+{
+  const lastSx={};
+  DRAWS.forEach(([q,n])=>{
+    const s=NUM_META[n][0];
+    sxGapAt[q]=lastSx[s]!==undefined?q-lastSx[s]:null;
+    lastSx[s]=q;
+  });
+}
+function renderHist(){
+  const sel=document.getElementById("histNumSel").value;
+  const startQi=histWin===0?1:LAST_QI-histWin+1;
+  const rows=DRAWS.filter(([q,n])=>q>=startQi && (sel==="all"||Number(sel)===n)).slice().reverse();
+  document.getElementById("histBadge").textContent=winLabel(histWin)+" · 共 "+rows.length+" 期";
+  let h="";
+  rows.forEach(([q,n])=>{
+    const m=meta(n);
+    const prev=numHist[n].filter(x=>x<q);
+    const items=[];
+    for(let i=0;i<Math.min(4,prev.length);i++){
+      const gap=(i===0?q:prev[i-1])-prev[i];
+      items.push(fmt3(prev[i])+"期<i>（隔"+gap+"）</i>");
+    }
+    h+='<div class="hrow"><div class="hb" style="background:'+WAVE[m.bs]+'">'+fmt2(n)+'</div>'
+      +'<div class="hi"><div class="hl">第 '+fmt3(q)+' 期 <span>· '+m.nx+(sxGapAt[q]===null?" · 肖首现":" · 隔"+sxGapAt[q]+"期")+" · "+m.bs+'波 · '+m.dx+m.jo+" · 累计 "+numCnt[n]+' 次</span>'+hcTag(n)+'</div>'
+      +'<div class="hd">'+(items.length?"此前最近 4 次："+items.join(" · "):"此前无开出记录")+'</div></div></div>';
+  });
+  document.getElementById("histRows").innerHTML=h||'<div class="note" style="padding:10px 0">该范围内没有记录</div>';
+}
+const histNumSelEl=document.getElementById("histNumSel");
+const optAll=document.createElement("option");
+optAll.value="all";optAll.textContent="全部号码";histNumSelEl.appendChild(optAll);
+for(let n=1;n<=49;n++){
+  const o=document.createElement("option");
+  o.value=n;o.textContent=fmt2(n)+" 号 · "+NUM_META[n][0]+" · "+NUM_META[n][2]+"波";
+  histNumSelEl.appendChild(o);
+}
+buildWinGrid("histWinGrid",()=>histWin,w=>histWin=w,renderHist);
+renderHist();
+
+// ===== 最近20期（含此前出现过哪些期、间隔多少期） =====
+const hist=document.getElementById("histList");
+DRAWS.slice(-20).reverse().forEach(([q,n])=>{
+  const m=meta(n);
+  const prev=numHist[n].filter(x=>x<q);          // 本期之前的所有出现期（近→远）
+  const items=[];
+  for(let i=0;i<Math.min(4,prev.length);i++){
+    const gap=(i===0?q:prev[i-1])-prev[i];       // 与后一次出现相隔的期数
+    items.push(fmt3(prev[i])+"期<i>（隔"+gap+"）</i>");
+  }
+  hist.insertAdjacentHTML("beforeend",
+    '<div class="hrow"><div class="hb" style="background:'+WAVE[m.bs]+'">'+fmt2(n)+'</div>'
+    +'<div class="hi"><div class="hl">第 '+fmt3(q)+' 期 <span>· '+m.nx+" · "+m.bs+'波 · '+m.dx+m.jo+" · 累计 "+numCnt[n]+' 次</span></div>'
+    +'<div class="hd">'+(items.length?"此前最近 4 次："+items.join(" · "):"此前无开出记录")+"</div></div></div>");
+});
+
+// ===== 标签切换 =====
+function switchTab(t){
+  const pages={miss:"pageMiss",query:"pageQuery",dims:"pageDims",hist:"pageHist",ref:"pageRef"};
+  const tabs={miss:"tabMiss",query:"tabQuery",dims:"tabDims",hist:"tabHist",ref:"tabRef"};
+  Object.keys(pages).forEach(k=>{
+    document.getElementById(pages[k]).style.display=k===t?"":"none";
+    document.getElementById(tabs[k]).classList.toggle("on",k===t);
+  });
+  window.scrollTo(0,0);
+}
+
+// ===== 对照表：号码总表 =====
+let rt="<tr><th>号码</th><th>生肖</th><th>波色</th><th>五行</th><th>天地</th><th>阴阳</th><th>男女</th><th>吉凶</th><th>四季</th><th>肖色</th><th>笔划</th><th>地支</th></tr>";
+for(let n=1;n<=49;n++){
+  const m=meta(n);
+  rt+="<tr><td><b>"+fmt2(n)+"</b></td><td>"+m.nx+"</td>"
+   +"<td><span class='wv' style='background:"+WAVE[m.bs]+"'></span>"+m.bs+"</td><td class='dim'>"+m.wx+"</td>"
+   +"<td class='dim'>"+m.td+"</td><td class='dim'>"+m.yy+"</td><td class='dim'>"+m.nn+"</td><td class='dim'>"+m.jx+"</td>"
+   +"<td class='dim'>"+m.sj+"</td><td class='dim'>"+m.sc+"</td><td class='dim'>"+m.bh+"</td><td class='dim'>"+m.dz+"</td></tr>";
+}
+document.getElementById("refNumTable").innerHTML=rt;
+
+// ===== 对照表：2026年生肖对照 =====
+const YEAR2026=[
+ ["01","鼠","07、19、31、43","梅花","23-01","子水"],
+ ["02","牛","06、18、30、42","荷花","01-03","丑土"],
+ ["03","虎","05、17、29、41","桃花","03-05","寅木"],
+ ["04","兔","04、16、28、40","兰花","05-07","卯木"],
+ ["05","龙","03、15、27、39","梨花","07-09","辰土"],
+ ["06","蛇","02、14、26、38","竹花","09-11","巳火"],
+ ["07","马","01、13、25、37、49","杏花","11-13","午火"],
+ ["08","羊","12、24、36、48","樱花","13-15","未土"],
+ ["09","猴","11、23、35、47","松花","15-17","申金"],
+ ["10","鸡","10、22、34、46","葵花","17-19","酉金"],
+ ["11","狗","09、21、33、45","菊花","19-21","戌土"],
+ ["12","猪","08、20、32、44","桂花","21-23","亥水"]];
+let yt="<tr><th>号位</th><th>生肖</th><th>灵码</th><th>花名</th><th>时辰</th><th>地支五行</th></tr>";
+YEAR2026.forEach(r=>{yt+="<tr><td><b>"+r[0]+"</b></td><td>"+r[1]+"</td><td class='dim'>"+r[2]+"</td><td class='dim'>"+r[3]+"</td><td class='dim'>"+r[4]+"</td><td class='dim'>"+r[5]+"</td></tr>";});
+document.getElementById("refYearTable").innerHTML=yt;
+
+// ===== 对照表：生肖分组 =====
+const GROUPS1=[
+ ["天地肖",{"天":["龙","兔","牛","马","猴","猪"],"地":["鼠","虎","蛇","羊","鸡","狗"]}],
+ ["阴阳肖",{"阴":["鼠","龙","蛇","马","狗","猪"],"阳":["牛","虎","兔","羊","猴","鸡"]}],
+ ["男女肖",{"男":["鼠","牛","虎","龙","马","猴","狗"],"女":["兔","蛇","羊","鸡","猪"]}],
+ ["吉凶肖",{"吉":["兔","龙","蛇","马","羊","鸡"],"凶":["鼠","牛","虎","猴","狗","猪"]}]];
+const GROUPS2=[
+ ["笔划",{"单笔":["鼠","龙","马","蛇","鸡","猪"],"双笔":["虎","猴","狗","兔","羊","牛"]}],
+ ["肖色",{"红":["马","兔","鼠","鸡"],"绿":["羊","龙","牛","狗"],"蓝":["蛇","虎","猪","猴"]}],
+ ["四季肖",{"春(东)":["兔","虎","龙"],"夏(南)":["马","蛇","羊"],"秋(西)":["鸡","猴","狗"],"冬(北)":["鼠","猪","牛"]}]];
+function renderGroups(elId,groups){
+  let html="";
+  groups.forEach(([name,cats])=>{
+    html+='<div class="grp"><div class="glabel">'+name+'</div><div class="gitems">';
+    Object.entries(cats).forEach(([k,list])=>{
+      html+='<span class="gchip plain">'+k+" · "+list.join(" ")+"</span>";
+    });
+    html+="</div></div>";
+  });
+  document.getElementById(elId).innerHTML=html;
+}
+renderGroups("refGroups1",GROUPS1);
+renderGroups("refGroups2",GROUPS2);
+
+// ===== 对照表：生肖五行 =====
+const SX_WX_ORDER=["金","木","水","火","土"];
+let swx="";
+SX_WX_ORDER.forEach(w=>{
+  const list=SX.filter(s=>SX_META[s].dz===w);
+  swx+='<div class="grp"><div class="glabel">'+w+"肖</div><div class=\"gitems\"><span class=\"gchip plain\">"+list.join(" ")+"</span></div></div>";
+});
+document.getElementById("refGroups0").innerHTML=swx;
+
+// ===== 对照表：波色单双 + 五行（由号码数据推导） =====
+const waveRows=[["红","r"],["蓝","b"],["绿","g"]];
+let wh="";
+waveRows.forEach(([w])=>{
+  ["单","双"].forEach(p=>{
+    const list=[];for(let n=1;n<=49;n++)if(NUM_META[n][2]===w&&(n%2?(p==="单"):(p==="双")))list.push(fmt2(n));
+    wh+='<div class="grp"><div class="glabel">'+w+"波"+p+'</div><div class="gitems"><span class="gchip" style="background:'+WAVE[w]+'">'+list.join(" ")+"</span></div></div>";
+  });
+});
+document.getElementById("refWave").innerHTML=wh;
+const WX_ORDER=["金","木","水","火","土"];
+let wxh="";
+WX_ORDER.forEach(w=>{
+  const list=[];for(let n=1;n<=49;n++)if(NUM_META[n][1]===w)list.push(fmt2(n));
+  wxh+='<div class="grp"><div class="glabel">'+w+'</div><div class="gitems"><span class="gchip plain">'+list.join(" ")+"</span></div></div>";
+});
+document.getElementById("refWx").innerHTML=wxh;
+
+// ===== 查询页：组合筛选（最多 3 个条件同时满足） =====
+const Q_DIMS=[{label:"生肖",cats:SX,nx:true}].concat(DIMS.map(d=>({label:d.name,name:d.name,key:d.key,cats:d.cats,scope:d.scope})));
+const q3s=[document.getElementById("q3a"),document.getElementById("q3b"),document.getElementById("q3c")];
+const q3Out=document.getElementById("q3Out");
+let q3All=false;
+function q3More(){q3All=!q3All;renderQ3();}
+q3s.forEach(sel=>{
+  let h='<option value="">不限</option>';
+  Q_DIMS.forEach((d,di)=>{
+    h+='<optgroup label="'+d.label+'">'+d.cats.map(c=>'<option value="'+di+'|'+c+'">'+c+"</option>").join("")+"</optgroup>";
+  });
+  sel.innerHTML=h;
+});
+const parseCond=v=>{if(!v)return null;const p=v.split("|");return {d:Q_DIMS[+p[0]],cat:p[1]};};
+const condMatch=(n,c)=>{const m=meta(n);return c.d.nx?m.nx===c.cat:scopeVal(m,c.d)===c.cat;};
+function renderQ3(){
+  const conds=q3s.map(s=>parseCond(s.value)).filter(Boolean);
+  if(!conds.length){q3Out.innerHTML='<div style="color:var(--tx3);font-size:12px;padding:4px 0">在上方选择条件，可只选一个，也可三条件叠加。</div>';return;}
+  const nums=Array.from({length:49},(_,k)=>k+1).filter(n=>conds.every(c=>condMatch(n,c)));
+  const desc=conds.map(c=>'<span class="gchip plain">'+c.d.label+" · "+c.cat+"</span>").join("");
+  if(!nums.length){q3Out.innerHTML='<div class="q3desc">'+desc+'</div><div class="dim" style="margin-top:6px">没有同时满足这些条件的号码，请调整条件。</div>';return;}
+  const set=new Set(nums);
+  const h=[];
+  for(let i=DRAWS.length-1;i>=0;i--)if(set.has(DRAWS[i][1]))h.push(DRAWS[i][0]);
+  const k=nums.length,th=k/49*100,pct=h.length/TOTAL*100,dev=pct-th;
+  const asc=h.slice().sort((a,b)=>a-b);
+  const ivs=[];
+  for(let i=1;i<asc.length;i++)ivs.push(asc[i]-asc[i-1]);
+  if(asc.length)ivs.push(LAST_QI-asc[asc.length-1]);
+  const avg=ivs.length?(ivs.reduce((s,x)=>s+x,0)/ivs.length).toFixed(1):"-";
+  const mx=ivs.length?Math.max(...ivs):"-",mn=ivs.length?Math.min(...ivs):"-";
+  const base=Math.max(1,Math.round(49/k));
+  const LIM=24,shown=(q3All||h.length<=LIM)?h:h.slice(0,LIM);
+  q3Out.innerHTML=
+    '<div class="q3desc">'+desc+"</div>"
+    +kv("符合的号码（"+k+" 个，理 "+th.toFixed(1)+"%）",nums.map(x=>'<span class="chip" style="background:'+WAVE[NUM_META[x][2]]+';font-size:11px">'+fmt2(x)+"</span>").join(" "))
+    +kv("累计出现",h.length?"<b>"+h.length+"</b> 次 · 占 "+TOTAL+" 期的 "+pct.toFixed(1)+"% <span class='dim'>(偏离 "+(dev>=0?"+":"")+dev.toFixed(1)+"pp)</span>":"尚无出现记录")
+    +(h.length?kv("平均间隔","<b>"+avg+"</b> 期（最短 "+mn+" · 最长 "+mx+"）"):"")
+    +(h.length?kv("最近一次 / 当前遗漏","第 "+fmt3(h[0])+" 期 · 已隔 <b>"+(LAST_QI-h[0])+"</b> 期"):"")
+    +(h.length?'<div class="dqblk"><div class="dqblk-t">'+((q3All||h.length<=LIM)?"全部出现记录":"最近 "+LIM+" 条")+'（共 '+h.length+" 次）</div>"
+      +gapLegend(base,h,LAST_QI)+recentList(shown,LAST_QI,base)+"</div>"
+      +(h.length>LIM?'<button class="dqmore" onclick="q3More()">'+(q3All?"收起，只看最近 "+LIM+" 条":"显示全部 "+h.length+" 条记录")+"</button>":""):"");
+}
+renderQ3();
+
+// ===== 历史：遗漏续等统计 =====
+const WAIT_LV=[10,20,30,40,50,60,70,80,90,100,110,120,130,140,150];
+let waitN=10;
+const waitGrid=document.getElementById("waitGrid");
+WAIT_LV.forEach(v=>{
+  const b=document.createElement("button");
+  b.textContent=v+"期";
+  b.onclick=()=>{waitN=v;renderWait();};
+  waitGrid.appendChild(b);
+});
+function renderWait(){
+  const lo=waitN===10?1:waitN-9,hi=waitN;
+  document.getElementById("waitBadge").textContent=waitN===10?"遗漏 ≤10 期":"遗漏 "+lo+"–"+hi+" 期";
+  [...waitGrid.children].forEach((x,i)=>x.classList.toggle("on",WAIT_LV[i]===waitN));
+  const per={},tot={};
+  let total=0,allCnt=0;
+  for(let num=1;num<=49;num++){
+    const asc=(numHist[num]||[]).slice().sort((a,b)=>a-b);
+    per[num]=0;tot[num]=0;
+    for(let k=1;k<asc.length;k++){
+      const gap=asc[k]-asc[k-1];
+      tot[num]++;allCnt++;
+      if(gap>=lo&&gap<=hi){per[num]++;total++;}
+    }
+  }
+  const pct=allCnt?total/allCnt*100:0;
+  let best=1;for(let n=2;n<=49;n++)if(per[n]>per[best])best=n;
+  const sumEl=document.getElementById("waitSum"),tb=document.getElementById("waitTable");
+  sumEl.innerHTML="「遗漏 "+(waitN===10?"1–10":lo+"–"+hi)+" 期」内再开出的次数合计：<b>"+total+"</b> 次 · 占全部 "+allCnt+" 次完整间隔的 <b>"+pct.toFixed(1)+"%</b>"
+    +(total?"<br>出现最多：第 "+fmt3(best)+" 号（"+per[best]+" 次） · 49 个号码平均 "+(total/49).toFixed(1)+" 次":"");
+  let t="<tr><th>号码</th><th>生肖</th><th>该区间次数</th><th>占该号间隔</th></tr>";
+  for(let n=1;n<=49;n++){
+    t+="<tr><td>"+fmt2(n)+"</td><td>"+NUM_META[n][0]+"</td><td>"+per[n]+"</td><td>"+(tot[n]?(per[n]/tot[n]*100).toFixed(0)+"%":"-")+"</td></tr>";
+  }
+  tb.innerHTML=t;
+}
+renderWait();
+
+</script>
+</body>
+</html>
